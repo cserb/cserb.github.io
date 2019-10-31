@@ -4,25 +4,23 @@
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Build your first blockchain from scratch (#3 Finding the longest chain) - cșerb</title><meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta property="og:title" content="Build your first blockchain from scratch (#3 Finding the longest chain)" />
-<meta property="og:description" content="In the previous articles (Probabilistic Finality, DAG) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.
-Today we are going have a look at implementing a basic DAG in Crystal. We will focus on implementing a DAG::Vertex class and finding the vertex with the longest distance from a given starting vertex. Each vertex will have a unique name and a Hash to represent its edges pointing to its children." />
+<meta property="og:description" content="Implementing a DAG in Crystal to find the longest chain" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://cserb.github.io/posts/finding-the-longest-chain/" />
+<meta property="og:url" content="https://cserb.net/posts/finding-the-longest-chain/" />
 <meta property="article:published_time" content="2019-10-31T13:11:56+01:00" />
 <meta property="article:modified_time" content="2019-10-31T13:11:56+01:00" />
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Build your first blockchain from scratch (#3 Finding the longest chain)"/>
-<meta name="twitter:description" content="In the previous articles (Probabilistic Finality, DAG) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.
-Today we are going have a look at implementing a basic DAG in Crystal. We will focus on implementing a DAG::Vertex class and finding the vertex with the longest distance from a given starting vertex. Each vertex will have a unique name and a Hash to represent its edges pointing to its children."/>
+<meta name="twitter:description" content="Implementing a DAG in Crystal to find the longest chain"/>
 <link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,300italic,400italic|Raleway:200,300" rel="stylesheet">
 
-	<link rel="stylesheet" type="text/css" media="screen" href="https://cserb.github.io/css/normalize.css" />
-	<link rel="stylesheet" type="text/css" media="screen" href="https://cserb.github.io/css/main.css" />
-	<link rel="stylesheet" type="text/css" href="https://cserb.github.io/css/custom.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cserb.net/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cserb.net/css/main.css" />
+	<link rel="stylesheet" type="text/css" href="https://cserb.net/css/custom.css" />
 	
 
 	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-	<script src="https://cserb.github.io/js/main.js"></script>
+	<script src="https://cserb.net/js/main.js"></script>
 </head>
 
 <body>
