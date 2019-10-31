@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Build your first blockchain from scratch (#3 Finding the longest chain) - cșerb</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta property="og:title" content="Build your first blockchain from scratch (#3 Finding the longest chain)" />
+<meta property="og:description" content="In the previous articles (Probabilistic Finality, DAG) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.
+Today we are going have a look at implementing a basic DAG in Crystal. We will focus on implementing a DAG::Vertex class and finding the vertex with the longest distance from a given starting vertex. Each vertex will have a unique name and a Hash to represent its edges pointing to its children." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://cserb.net/posts/finding-the-longest-chain/" />
+<meta property="article:published_time" content="2019-10-31T13:11:56+01:00" />
+<meta property="article:modified_time" content="2019-10-31T13:11:56+01:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Build your first blockchain from scratch (#3 Finding the longest chain)"/>
+<meta name="twitter:description" content="In the previous articles (Probabilistic Finality, DAG) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.
+Today we are going have a look at implementing a basic DAG in Crystal. We will focus on implementing a DAG::Vertex class and finding the vertex with the longest distance from a given starting vertex. Each vertex will have a unique name and a Hash to represent its edges pointing to its children."/>
+<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,300italic,400italic|Raleway:200,300" rel="stylesheet">
+
+	<link rel="stylesheet" type="text/css" media="screen" href="http://cserb.net/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="http://cserb.net/css/main.css" />
+	<link rel="stylesheet" type="text/css" href="http://cserb.net/css/custom.css" />
+	
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+	<script src="http://cserb.net/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper post">
+		<div class="header">
+	<h1 class="site-title"><a href="/">cșerb</a></h1>
+	<div class="site-description"><h2>cserb.net — blockchain, crystal, startups</h2><nav class="nav social">
+			<ul class="flat"><a href="https://github.com/cserb" title="Github"><i data-feather="github"></i></a><a href="https://twitter.com/cerbivore" title="Twitter"><i data-feather="twitter"></i></a></ul>
+		</nav>
+	</div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">Posts</a>
+			</li>
+			
+			<li>
+				<a href="https://represent.io/cserb">CV</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post-header">
+			<h1 class="title">Build your first blockchain from scratch (#3 Finding the longest chain)</h1>
+			<div class="meta">Posted at &mdash; Oct 31, 2019</div>
+		</div>
+
+		<div class="markdown">
+			<p>In the previous articles (<a href="https://dev.to/cerbivore/build-your-first-blockchain-from-scratch-463p">Probabilistic Finality</a>, <a href="https://dev.to/cerbivore/build-your-first-blockchain-from-scratch-2-dag-4f8k">DAG</a>) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.</p>
+
+<p>Today we are going have a look at implementing a basic DAG in <a href="https://crystal-lang.org">Crystal</a>. We will focus on implementing a <code>DAG::Vertex</code> class and finding the <em>vertex</em> with the longest distance from a given starting vertex.
+Each vertex will have a unique name and a <a href="https://crystal-lang.org/api/0.31.1/Hash.html">Hash</a> to represent its edges pointing to its children.</p>
+
+<p>Here is the complete finished implementation:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#00f">module</span> DAG
+  <span style="color:#00f">class</span> <span style="color:#2b91af">Vertex</span>
+    <span style="color:#00f">alias</span> Name = String
+
+    getter name : Name
+    getter edges : Hash(Name, Vertex)
+
+    <span style="color:#00f">def</span> initialize(@name, @edges = {} of Name =&gt; Vertex)
+    <span style="color:#00f">end</span>
+
+    <span style="color:#00f">def</span> add(edge_to vertex : Vertex) : Void
+      @edges[vertex.name] = vertex
+    <span style="color:#00f">end</span>
+
+    <span style="color:#00f">def</span> children : Array(Vertex)
+      @edges.values
+    <span style="color:#00f">end</span>
+  <span style="color:#00f">end</span>
+
+  <span style="color:#00f">extend</span> self
+
+  <span style="color:#00f">def</span> distances(
+    from vertex : DAG::Vertex,
+    visited = Hash(DAG::Vertex::Name, Bool).new(<span style="color:#00f">false</span>),
+    stack = Hash(DAG::Vertex, Int32).new(0)
+  ) : Hash(DAG::Vertex, Int32)
+
+    visited[vertex.name] = <span style="color:#00f">true</span>
+
+    sorted_children = vertex.children.sort_by { |c| c.name }
+    sorted_children.each <span style="color:#00f">do</span> |child|
+      <span style="color:#00f">if</span> !visited[child.name]
+        stack[child] = stack[vertex] + 1
+        distances(<span style="color:#a31515">from</span>: child, <span style="color:#a31515">visited</span>: visited, <span style="color:#a31515">stack</span>: stack)
+      <span style="color:#00f">end</span>
+    <span style="color:#00f">end</span>
+
+    stack
+  <span style="color:#00f">end</span>
+
+  <span style="color:#00f">def</span> tip_of_longest_branch(from vertex : DAG::Vertex) : Array
+    distances = self.distances(<span style="color:#a31515">from</span>: vertex)
+
+    <span style="color:#008000"># Tip of longest branch (chain)</span>
+    distances.map { |k, v| [k, v] }.sort_by { |d| d[1].as(Int32) }.last
+  <span style="color:#00f">end</span>
+<span style="color:#00f">end</span></code></pre></div>
+<p>Let&rsquo;s break the code apart to understand how it works.</p>
+
+<p><strong>1. DAG::Vertex Class</strong></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#00f">module</span> DAG
+  <span style="color:#00f">class</span> <span style="color:#2b91af">Vertex</span>
+    <span style="color:#00f">alias</span> Name = String
+
+    getter name : Name
+    getter edges : Hash(Name, Vertex)
+
+    <span style="color:#00f">def</span> initialize(@name, @edges = {} of Name =&gt; Vertex)
+    <span style="color:#00f">end</span>
+
+    <span style="color:#00f">def</span> add(edge_to vertex : Vertex) : Void
+      @edges[vertex.name] = vertex
+    <span style="color:#00f">end</span>
+
+    <span style="color:#00f">def</span> children : Array(Vertex)
+      @edges.values
+    <span style="color:#00f">end</span>
+  <span style="color:#00f">end</span>
+
+  ...
+
+<span style="color:#00f">end</span></code></pre></div>
+<p>This should be straight forward. We pass along the <code>Name</code> when we initialize a new Vertex. Afterwards we create its edges:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">v1 = DAG::Vertex.new(<span style="color:#a31515">&#34;A&#34;</span>)
+v2 = DAG::Vertex.new(<span style="color:#a31515">&#34;B&#34;</span>)
+
+v1.add <span style="color:#a31515">edge_to</span>: v2
+
+pp v1.name <span style="color:#008000">#=&gt; &#34;A&#34;</span>
+pp v1.children <span style="color:#008000">#=&gt; [#&lt;DAG::Vertex:0x7f0f4866ee60 @edges={}, @name=&#34;B&#34;&gt;]</span>
+<span style="color:#008000"># same as</span>
+pp v1.edges.values <span style="color:#008000">#=&gt; [#&lt;DAG::Vertex:0x7f0f4866ee60 @edges={}, @name=&#34;B&#34;&gt;]</span></code></pre></div>
+<p>You can play with the code <a href="https://play.crystal-lang.org/#/r/7wq4/edit">here</a></p>
+
+<p><strong>2. Distances and the Tip of the longest branch</strong></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#00f">module</span> DAG
+
+  ...
+
+  <span style="color:#00f">extend</span> self
+
+  <span style="color:#00f">def</span> distances(
+    from vertex : DAG::Vertex,
+    visited = Hash(DAG::Vertex::Name, Bool).new(<span style="color:#00f">false</span>),
+    stack = Hash(DAG::Vertex, Int32).new(0)
+  ) : Hash(DAG::Vertex, Int32)
+
+    visited[vertex.name] = <span style="color:#00f">true</span>
+
+    sorted_children = vertex.children.sort_by { |c| c.name }
+    sorted_children.each <span style="color:#00f">do</span> |child|
+      <span style="color:#00f">if</span> !visited[child.name]
+        stack[child] = stack[vertex] + 1
+        distances(<span style="color:#a31515">from</span>: child, <span style="color:#a31515">visited</span>: visited, <span style="color:#a31515">stack</span>: stack)
+      <span style="color:#00f">end</span>
+    <span style="color:#00f">end</span>
+
+    stack
+  <span style="color:#00f">end</span>
+
+  <span style="color:#00f">def</span> tip_of_longest_branch(from vertex : DAG::Vertex) : Array
+    distances = self.distances(<span style="color:#a31515">from</span>: vertex)
+
+    <span style="color:#008000"># Tip of longest branch (chain)</span>
+    distances.map { |k, v| [k, v] }.sort_by { |d| d[1].as(Int32) }.last
+  <span style="color:#00f">end</span>
+<span style="color:#00f">end</span></code></pre></div>
+<p>To find out the distances starting from block <code>B1</code> to <code>Bn</code> we use depth first search (DFS), that explores each branch to the end and than moves on to the next one.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#00f">def</span> distances(
+    from vertex : DAG::Vertex,
+    visited = Hash(DAG::Vertex::Name, Bool).new(<span style="color:#00f">false</span>),
+    stack = Hash(DAG::Vertex, Int32).new(0)
+  ) : Hash(DAG::Vertex, Int32)
+
+  ...
+<span style="color:#00f">end</span></code></pre></div>
+<p>We start by passing a starting vertex to the method as <code>from vertex</code> parameter. The method has a <code>visited</code> parameter that is an empty hash, which has been initialized with a default value of <code>false</code> for each key that is unknown. Same applies to the <code>stack</code> parameter with a default value of <code>0</code>. The stack contains the actual distance values.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">    ...
+
+    visited[vertex.name] = <span style="color:#00f">true</span>
+
+    sorted_children = vertex.children.sort_by { |c| c.name }
+    sorted_children.each <span style="color:#00f">do</span> |child|
+      <span style="color:#00f">if</span> !visited[child.name]
+        stack[child] = stack[vertex] + 1
+        distances(<span style="color:#a31515">from</span>: child, <span style="color:#a31515">visited</span>: visited, <span style="color:#a31515">stack</span>: stack)
+      <span style="color:#00f">end</span>
+    <span style="color:#00f">end</span>
+
+    ...</code></pre></div>
+<p>The rest is pretty simple as well. We mark the vertex currently passed as <code>from vertex</code> parameter as visited and then we move on to its <em>unvisited</em> children. On a step forward we give the child a distance which is <code>parent distance + 1</code>.</p>
+
+<p>If you think you need to better understand DFS you should watch <a href="https://www.youtube.com/watch?v=7fujbpJ0LB4">this video</a>.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">  <span style="color:#00f">def</span> tip_of_longest_branch(from vertex : DAG::Vertex) : Array
+    distances = self.distances(<span style="color:#a31515">from</span>: vertex)
+
+    <span style="color:#008000"># Tip of longest branch (chain)</span>
+    distances.map { |k, v| [k, v] }.sort_by { |d| d[1].as(Int32) }.last
+  <span style="color:#00f">end</span></code></pre></div>
+<p>To find the tip of the longest chain we just look at the distances and pick the vertex with the highest distance value. If there are multiple vertices with the same distance we don&rsquo;t really care which one we pick. Why this is not important will become apparent later in the series.</p>
+
+<p>Now let&rsquo;s give it a try:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">v1 = DAG::Vertex.new(<span style="color:#a31515">&#34;A&#34;</span>)
+v2 = DAG::Vertex.new(<span style="color:#a31515">&#34;B&#34;</span>)
+v3 = DAG::Vertex.new(<span style="color:#a31515">&#34;C&#34;</span>)
+v4 = DAG::Vertex.new(<span style="color:#a31515">&#34;D&#34;</span>)
+
+
+v1.add <span style="color:#a31515">edge_to</span>: v2
+v2.add <span style="color:#a31515">edge_to</span>: v3
+v3.add <span style="color:#a31515">edge_to</span>: v4
+
+pp DAG.distances <span style="color:#a31515">from</span>: v1
+<span style="color:#008000">#  {#&lt;DAG::Vertex:0x7fe7f2a75e60 @edges={</span>
+<span style="color:#008000">#    &#34;C&#34; =&gt; #&lt;DAG::Vertex:0x7fe7f2a75e40 @edges={</span>
+<span style="color:#008000">#      &#34;D&#34; =&gt; #&lt;DAG::Vertex:0x7fe7f2a75e20 @edges={}, #@name=&#34;D&#34;&gt;},</span>
+<span style="color:#008000">#    @name=&#34;C&#34;&gt;},</span>
+<span style="color:#008000">#  @name=&#34;B&#34;&gt; =&gt; 1,</span>
+<span style="color:#008000">#  #&lt;DAG::Vertex:0x7fe7f2a75e40 @edges={</span>
+<span style="color:#008000">#    &#34;D&#34; =&gt; #&lt;DAG::Vertex:0x7fe7f2a75e20 @edges={}, @name=&#34;D&#34;&gt;},</span>
+<span style="color:#008000">#  @name=&#34;C&#34;&gt; =&gt; 2,</span>
+<span style="color:#008000">#  #&lt;DAG::Vertex:0x7fe7f2a75e20 @edges={}, @name=&#34;D&#34;&gt; =&gt; 3}</span>
+
+
+pp DAG.tip_of_longest_branch <span style="color:#a31515">from</span>: v1
+<span style="color:#008000"># [#&lt;DAG::Vertex:0x7fce18464e20 @edges={}, @name=&#34;D&#34;&gt;, 3]</span></code></pre></div>
+<p>You can try it out yourself <a href="https://play.crystal-lang.org/#/r/7x1b/edit">here</a> and create more complex structures resembling real life scenarios.</p>
+
+<p><strong>3. Conclusion</strong></p>
+
+<p>We found an easy way to create a DAG and using a simple depth first search we were able to find the tip of the longest chain.</p>
+
+<p>Integrating the code into a working blockchain will require some more work, but we&rsquo;ll get to that later on.</p>
+
+<p><strong>4. Cocol Project</strong></p>
+
+<p>The <a href="https://github.com/cocol-project">Cocol Project</a> is an effort to implement a basic, but fully working, blockchain in Crystal — a &ldquo;Minimum Viable Blockchain&rdquo;</p>
+
+<p>The code we talked about in this article is part of the <a href="https://gitbub.com/cocol-project/probfin">ProbFin</a> shard. Here is the <a href="https://github.com/cocol-project/probfin/blob/master/src/dag.cr">DAG implementation</a> and the <a href="https://github.com/cocol-project/probfin/blob/master/spec/dag_spec.cr">tests</a></p>
+
+		</div>
+
+		<div class="post-tags">
+			
+				
+			
+		</div></div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div> © 2019 Cristian Serb |  <a href="https://github.com/vividvilla/ezhil">Ezhil theme</a> | Built with <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+<script>feather.replace()</script>
+</body>
+</html>
