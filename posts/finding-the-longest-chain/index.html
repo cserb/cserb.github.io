@@ -27,7 +27,7 @@
 	<div class="container wrapper post">
 		<div class="header">
 	<h1 class="site-title"><a href="/">cșerb</a></h1>
-	<div class="site-description"><h2>cserb.net — blockchain, crystal, startups</h2><nav class="nav social">
+	<div class="site-description"><h2>cserb.net — blockchain, crystal-lang, startups</h2><nav class="nav social">
 			<ul class="flat"><a href="https://github.com/cserb" title="Github"><i data-feather="github"></i></a><a href="https://twitter.com/cerbivore" title="Twitter"><i data-feather="twitter"></i></a></ul>
 		</nav>
 	</div>
@@ -41,6 +41,10 @@
 			
 			<li>
 				<a href="/posts">Posts</a>
+			</li>
+			
+			<li>
+				<a href="https://github.com/cocol-project">Cocol Project</a>
 			</li>
 			
 			<li>
@@ -58,7 +62,7 @@
 		</div>
 
 		<div class="markdown">
-			<p>In the previous articles (<a href="https://dev.to/cerbivore/build-your-first-blockchain-from-scratch-463p">Probabilistic Finality</a>, <a href="https://dev.to/cerbivore/build-your-first-blockchain-from-scratch-2-dag-4f8k">DAG</a>) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.</p>
+			<p>In the previous articles (<a href="https://cserb.net/posts/probabilistic-finality/">Probabilistic Finality</a>, <a href="https://cserb.net/posts/dag/">DAG</a>) we looked into how Probabilistic Finality works and how DAGs can help to find the longest chain.</p>
 
 <p>Today we are going have a look at implementing a basic DAG in <a href="https://crystal-lang.org">Crystal</a>. We will focus on implementing a <code>DAG::Vertex</code> class and finding the <em>vertex</em> with the longest distance from a given starting vertex.
 Each vertex will have a unique name and a <a href="https://crystal-lang.org/api/0.31.1/Hash.html">Hash</a> to represent its edges pointing to its children.</p>

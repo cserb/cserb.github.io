@@ -1,0 +1,11 @@
+.header .site-title {
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+}
+a, a:hover, .post .draft-label, .post-tags .tags a {
+    color: #00bcd4;
+}
+
+.post-header .title {
+    font-weight: 600;
+}
