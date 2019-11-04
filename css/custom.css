@@ -1,11 +1,31 @@
+.wrapper {
+    max-width: 900px;
+}
 .header .site-title {
     font-family: Arial, sans-serif;
     font-weight: 600;
+    margin-bottom: 16px;
 }
 a, a:hover, .post .draft-label, .post-tags .tags a {
     color: #00bcd4;
 }
 
 .post-header .title {
+    font-family: "Open Sans", sans-serif;
+    font-size: 36px;
     font-weight: 600;
+    color: #515151;
+}
+
+.recent-posts .post .title {
+    font-family: "Open Sans", sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: #515151;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.recent-posts .description {
+    color: #717171;
 }

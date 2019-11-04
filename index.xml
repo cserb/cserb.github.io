@@ -39,10 +39,7 @@ The data structure above resembles a Directed Acyclic Graph (DAG) and fortunatel
       <pubDate>Thu, 31 Oct 2019 11:49:12 +0100</pubDate>
       
       <guid>https://cserb.net/posts/probabilistic-finality/</guid>
-      <description>This is the first part in a series that will teach you how to develop a full featured blockchain from scratch. First you have to understand some concepts behind blockchain technology and how they work together.
-In this article we will focus on the concept of &amp;ldquo;Probabilistic Finality&amp;rdquo;.
-1. Probabilistic Finality
-Finality is the agreement that a valid transaction between A and B has been executed and can&amp;rsquo;t be reverted.</description>
+      <description>This is the first part in a series that will teach you how to build a full featured blockchain from scratch. Introduction I won&amp;rsquo;t be able to cover all aspects in detail, neither is it intended. You should rather make yourself familiar with the high level concept of how a blockchain works. As kind of a reference point you should be familiar with Andreas Antonopoulos&amp;rsquo; book Mastering Bitcoin, which if needed covers quite some detail.</description>
     </item>
     
   </channel>
